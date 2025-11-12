@@ -55,3 +55,73 @@ BuildContext adalah objek yang menyediakan informasi tentang lokasi widget dalam
 ### 6. Jelaskan konsep "hot reload" di Flutter dan bagaimana bedanya dengan "hot restart".
 
 Hot reload memperbarui kode aplikasi tanpa kehilangan state aplikasi, sehingga perubahan UI langsung terlihat. Hot restart me-restart aplikasi sepenuhnya, menghilangkan state dan memuat ulang aplikasi dari awal. Hot reload lebih cepat untuk perubahan UI, sedangkan hot restart diperlukan untuk perubahan struktural seperti main.dart.
+
+## Tugas 8
+
+### 1. Jelaskan perbedaan antara Navigator.push() dan Navigator.pushReplacement() pada Flutter. Dalam kasus apa sebaiknya masing-masing digunakan pada aplikasi Football Shop kamu?
+
+Navigator.push() menambahkan route baru ke stack navigation, sehingga pengguna dapat menggunakan tombol back untuk kembali ke halaman sebelumnya. Navigator.pushReplacement() menggantikan route teratas (topmost route) dengan route baru, sehingga pengguna tidak dapat kembali ke halaman sebelumnya dengan tombol back.
+
+Di aplikasi CHUKGOODS saya:
+- Navigator.push() digunakan untuk navigasi ke halaman form tambah produk, sehingga pengguna dapat kembali ke halaman utama setelah selesai mengisi form
+- Navigator.pushReplacement() digunakan untuk navigasi drawer dari halaman utama ke halaman form, karena tidak ingin pengguna kembali ke halaman utama melalui tombol back ketika sedang mengisi form
+
+### 2. Bagaimana kamu memanfaatkan hierarchy widget seperti Scaffold, AppBar, dan Drawer untuk membangun struktur halaman yang konsisten di seluruh aplikasi?
+
+Saya memanfaatkan widget hierarchy dengan:
+- Scaffold sebagai container utama untuk setiap halaman yang menyediakan struktur standar (AppBar, body, drawer)
+- AppBar dengan judul yang konsisten dan styling yang seragam untuk memberikan identitas visual aplikasi
+- Drawer yang berisi menu navigasi dengan opsi "Halaman Utama" dan "Tambah Produk" untuk memberikan akses navigasi yang mudah
+- Konsistensi dalam styling, warna tema, dan spacing untuk menciptakan pengalaman pengguna yang cohesif
+
+### 3. Dalam konteks desain antarmuka, apa kelebihan menggunakan layout widget seperti Padding, SingleChildScrollView, dan ListView saat menampilkan elemen-elemen form? Berikan contoh penggunaannya dari aplikasi kamu.
+
+- Padding memberikan ruang yang konsisten antar elemen form, meningkatkan readability dan usability.
+- SingleChildScrollView memungkinkan form yang panjang dapat di-scroll secara vertikal tanpa membutuhkan ukuran layar tertentu, sangat berguna untuk form dengan banyak field.
+- ListView efisien untuk menampilkan daftar item yang dapat di-scroll dengan built-in scrolling behavior.
+
+Contoh implementasi dalam aplikasi saya:
+```dart
+// Padding untuk spacing antar field
+Padding(
+  padding: const EdgeInsets.all(16.0),
+  child: Column(children: [...])
+)
+
+// SingleChildScrollView untuk form yang panjang
+SingleChildScrollView(
+  padding: const EdgeInsets.all(16.0),
+  child: Column(
+    children: [
+      TextFormField(...), // Name field
+      const SizedBox(height: 16),
+      TextFormField(...), // Price field
+      // ... more fields
+    ],
+  ),
+)
+
+// Dropdown form field dengan proper scrolling
+DropdownButtonFormField<String>(
+  items: categories.map(...).toList(),
+)
+```
+
+### 4. Bagaimana kamu menyesuaikan warna tema agar aplikasi Football Shop memiliki identitas visual yang konsisten dengan brand toko?
+
+Saya menyesuaikan tema aplikasi dengan mendefinisikan color scheme yang konsisten di MaterialApp:
+
+```dart
+MaterialApp(
+  title: 'CHUKGOODS',
+  theme: ThemeData(
+    colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue)
+        .copyWith(secondary: Colors.blueAccent[400]),
+  ),
+)
+```
+
+Kemudian menggunakan warna yang sama untuk:
+- AppBar dengan `backgroundColor: Theme.of(context).colorScheme.primary`
+- Button dengan `MaterialStateProperty.all(Colors.blue)`
+- Checkbox dan interactive elements dengan `activeColor: Theme.of(context).colorScheme.primary`

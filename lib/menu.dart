@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:chukgoods_mobile/product_form.dart';
 
 class MyHomePage extends StatelessWidget {
   MyHomePage({super.key});
@@ -26,6 +27,7 @@ class MyHomePage extends StatelessWidget {
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
+      drawer: const AppDrawer(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -125,16 +127,25 @@ class ItemCard extends StatelessWidget {
           String message;
           if (item.name == "All Products") {
             message = "Kamu telah menekan tombol All Products";
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(content: Text(message)),
+              );
           } else if (item.name == "My Products") {
             message = "Kamu telah menekan tombol My Products";
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(content: Text(message)),
+              );
           } else {
-            message = "Kamu telah menekan tombol Create Product";
-          }
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(content: Text(message)),
+            // Navigate to product form
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const ProductFormPage()),
             );
+          }
         },
         child: Container(
           padding: const EdgeInsets.all(8),
@@ -157,6 +168,51 @@ class ItemCard extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class AppDrawer extends StatelessWidget {
+  const AppDrawer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        children: [
+          const DrawerHeader(
+            decoration: BoxDecoration(
+              color: Colors.blue,
+            ),
+            child: Text(
+              'CHUKGOODS',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.home),
+            title: const Text('Halaman Utama'),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.add),
+            title: const Text('Tambah Produk'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const ProductFormPage()),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
