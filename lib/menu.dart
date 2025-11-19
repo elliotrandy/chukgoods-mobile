@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:chukgoods_mobile/product_form.dart';
+import 'package:chukgoods_mobile/screens/login.dart';
+import 'package:chukgoods_mobile/screens/product_list.dart';
+import 'package:chukgoods_mobile/screens/product_form.dart';
+import 'package:chukgoods_mobile/screens/my_products.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
 
 class MyHomePage extends StatelessWidget {
   MyHomePage({super.key});
@@ -9,9 +14,9 @@ class MyHomePage extends StatelessWidget {
   final String kelas = "C";
 
   final List<ItemHomepage> items = [
-    ItemHomepage("All Products", Icons.list, Colors.blue),
-    ItemHomepage("My Products", Icons.inventory, Colors.green),
-    ItemHomepage("Create Product", Icons.add, Colors.red),
+    ItemHomepage("All Products", Icons.list, const Color(0xFF2563eb)),
+    ItemHomepage("My Products", Icons.inventory, const Color(0xFF2563eb)),
+    ItemHomepage("Create Product", Icons.add, const Color(0xFF2563eb)),
   ];
 
   @override
@@ -25,7 +30,8 @@ class MyHomePage extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: const Color(0xFF2563eb),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       drawer: const AppDrawer(),
       body: Padding(
@@ -52,6 +58,7 @@ class MyHomePage extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18.0,
+                        color: Color(0xFF2563eb),
                       ),
                     ),
                   ),
@@ -93,7 +100,10 @@ class InfoCard extends StatelessWidget {
           children: [
             Text(
               title,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2563eb),
+              ),
             ),
             const SizedBox(height: 8.0),
             Text(content),
@@ -127,21 +137,19 @@ class ItemCard extends StatelessWidget {
           String message;
           if (item.name == "All Products") {
             message = "Kamu telah menekan tombol All Products";
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(content: Text(message)),
-              );
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ProductListPage()),
+            );
           } else if (item.name == "My Products") {
             message = "Kamu telah menekan tombol My Products";
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(content: Text(message)),
-              );
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MyProductsPage()),
+            );
           } else {
             // Navigate to product form
-            Navigator.pushReplacement(
+            Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const ProductFormPage()),
             );
@@ -183,7 +191,7 @@ class AppDrawer extends StatelessWidget {
         children: [
           const DrawerHeader(
             decoration: BoxDecoration(
-              color: Colors.blue,
+              color: Color(0xFF2563eb),
             ),
             child: Text(
               'CHUKGOODS',
@@ -195,14 +203,41 @@ class AppDrawer extends StatelessWidget {
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.home),
+            leading: const Icon(Icons.home, color: Color(0xFF2563eb)),
             title: const Text('Halaman Utama'),
             onTap: () {
-              Navigator.pop(context);
+              Navigator.pop(context); // Close drawer
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => MyHomePage()),
+                (route) => false, // Remove all previous routes
+              );
             },
           ),
           ListTile(
-            leading: const Icon(Icons.add),
+            leading: const Icon(Icons.list, color: Color(0xFF2563eb)),
+            title: const Text('Lihat Produk'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProductListPage()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.inventory, color: Color(0xFF2563eb)),
+            title: const Text('Produk Saya'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MyProductsPage()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.add, color: Color(0xFF2563eb)),
             title: const Text('Tambah Produk'),
             onTap: () {
               Navigator.pop(context);
@@ -211,6 +246,50 @@ class AppDrawer extends StatelessWidget {
                 MaterialPageRoute(builder: (context) => const ProductFormPage()),
               );
             },
+          ),
+          Builder(
+            builder: (context) => ListTile(
+              leading: const Icon(Icons.logout, color: Color(0xFF2563eb)),
+              title: const Text('Logout'),
+              onTap: () async {
+                final request = context.read<CookieRequest>();
+                try {
+                  final response = await request.postJson("http://localhost:8000/auth/logout/", "{}");
+
+                  if (response.containsKey('success') && response['success'] == true) {
+                    if (context.mounted) {
+                      // Clear login state
+                      request.loggedIn = false;
+                      
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginPage()),
+                        (route) => false, // Remove all previous routes
+                      );
+                    }
+                  } else {
+                    String errorMessage = response['message'] ?? 'Logout failed';
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(errorMessage),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Logout error: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+            ),
           ),
         ],
       ),
